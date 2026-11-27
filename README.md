@@ -10,7 +10,7 @@ Application web installable (PWA) pour Android (Samsung S21 Ultra) qui répond c
 - Deux profils : administrateur (paramètres, comptes, journaux) et utilisateur.
 - Sans serveur : toutes les données restent sur le téléphone. Français, unités métriques, thème sombre.
 
-Documents de référence : EDB et SDB v0.1 (validées le 26/11/2026), [cahier de développement](docs/cahier-de-dev.md).
+Documents de référence : EDB v0.1 et SDB v0.2 (validées le 26/11/2026), [cahier de développement](docs/cahier-de-dev.md), [cahier de recette](docs/cahier-de-recette.md).
 
 ## Utiliser l'application
 
@@ -18,6 +18,20 @@ Documents de référence : EDB et SDB v0.1 (validées le 26/11/2026), [cahier de
 2. Menu ⋮ → **Ajouter à l'écran d'accueil** → **Installer**.
 3. Au premier lancement, créer le compte administrateur, puis renseigner « Mon trajet ».
 4. Dans « Préférences », activer les notifications.
+
+## Mot de passe administrateur oublié
+
+L'application n'a pas de serveur : aucun mot de passe ne peut être récupéré ni réinitialisé à distance. S'il n'existe pas d'autre compte administrateur :
+
+1. Dans Chrome sur le téléphone, ouvrir l'adresse de l'application, puis ⋮ → **Paramètres** → **Paramètres des sites** → **Toutes les données des sites**.
+2. Rechercher `walle44.github.io`, puis **Effacer et réinitialiser**.
+3. Rouvrir l'application : l'écran de premier lancement réapparaît. Créer de nouveau le compte administrateur, puis ressaisir le trajet et les paramètres (tout a été effacé).
+
+Conseil : créer un second compte administrateur de secours, ou noter le mot de passe dans un gestionnaire de mots de passe.
+
+## Limites connues (v1)
+
+- Les droits administrateur sont contrôlés par l'application sur le téléphone. Une personne ayant le téléphone déverrouillé et les outils de développement de Chrome pourrait les contourner. Risque accepté pour la v1 (user_01, 27/11/2026) ; point majeur des versions suivantes.
 
 ## Développement
 

@@ -3,7 +3,9 @@ import { createLogger } from './js/core/logs.js';
 import { maybeNotify } from './js/core/notifier.js';
 import { idbStore } from './js/core/store.js';
 
-const VERSION = 'v1.0.0';
+// ANO-03 : le workflow de publication remplace cette valeur par « version-commit » à chaque déploiement,
+// ce qui installe un nouveau cache et livre la nouvelle version sur le téléphone.
+const VERSION = 'v1.0.1';
 const CACHE = `pluie-trajet-${VERSION}`;
 const SHELL = [
   './',
@@ -44,7 +46,13 @@ const SHELL = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // cache: 'reload' : on contourne le cache HTTP du navigateur pour ne jamais figer d'anciens fichiers.
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' }))))
+      .then(() => self.skipWaiting()),
+  );
 });
 
 self.addEventListener('activate', (event) => {

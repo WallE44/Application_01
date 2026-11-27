@@ -1,7 +1,7 @@
 // Mon trajet (EXG-04 à EXG-07) : adresses, carte, ma position, horaires, jours, mode/vitesse.
 import { reverseLabel, searchAddress } from '../../core/address.js';
 import { tripMetrics } from '../../core/forecast.js';
-import { MANUAL_SPEED_MAX, MANUAL_SPEED_MIN, MODES, validateTrip, WEEKDAYS } from '../../core/rules.js';
+import { eveningBeforeMorning, MANUAL_SPEED_MAX, MANUAL_SPEED_MIN, MODES, validateTrip, WEEKDAYS } from '../../core/rules.js';
 import { loadSettings } from '../../core/service.js';
 import { KEYS } from '../../core/store.js';
 import { alertBox, fmtNum, h, mount, timeInput } from '../dom.js';
@@ -156,6 +156,7 @@ export async function renderTrip(view, ctx) {
     ),
   );
 
+  let confirmedTimes = null;
   const saveBtn = h('button', { type: 'submit', class: 'primary block', id: 'save-trip' }, 'Enregistrer mon trajet');
   const form = h(
     'form',
@@ -173,6 +174,13 @@ export async function renderTrip(view, ctx) {
         };
         const v = validateTrip(candidate);
         if (!v.ok) return mount(msg, alertBox(v.errors.join(' · ')));
+        // ANO-06 : horaires inversés → avertissement, confirmation par un second appui
+        const timesKey = `${candidate.morning}|${candidate.evening}`;
+        if (eveningBeforeMorning(candidate) && confirmedTimes !== timesKey) {
+          confirmedTimes = timesKey;
+          saveBtn.textContent = 'Enregistrer quand même';
+          return mount(msg, alertBox(`Attention : le départ du soir (${candidate.evening}) n’est pas après celui du matin (${candidate.morning}). Vérifiez vos horaires, ou appuyez sur « Enregistrer quand même ».`, 'warn'));
+        }
         await ctx.store.set(KEYS.trip(ctx.user.id), candidate);
         await ctx.store.del(KEYS.forecast(ctx.user.id));
         mount(msg, alertBox('Trajet enregistré.', 'success'));

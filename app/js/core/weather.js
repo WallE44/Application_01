@@ -1,6 +1,8 @@
-// Accès Open-Meteo (RG-03). Seules les coordonnées des points sont envoyées (ENF-09).
+// Accès Open-Meteo (RG-03). Seules les coordonnées des points sont envoyées (ENF-09),
+// arrondies à 2 décimales (≈ 1 km, la maille du modèle météo est d'environ 2 km) : ANO-08.
 
 export const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast';
+export const COORD_DECIMALS = 2;
 export const HOURLY_VARS = ['precipitation_probability', 'precipitation', 'temperature_2m'];
 
 export class WeatherError extends Error {
@@ -14,7 +16,7 @@ export class WeatherError extends Error {
 /** Construit l'URL pour plusieurs points en un seul appel. */
 export function buildForecastUrl(points) {
   if (!points.length) throw new WeatherError('Aucun point à interroger');
-  const fmt = (n) => n.toFixed(4);
+  const fmt = (n) => n.toFixed(COORD_DECIMALS);
   const params = new URLSearchParams({
     latitude: points.map((p) => fmt(p.lat)).join(','),
     longitude: points.map((p) => fmt(p.lon)).join(','),

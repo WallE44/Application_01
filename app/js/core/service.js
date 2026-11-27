@@ -52,6 +52,13 @@ export async function getDayReport({ store, logger, userId, refresh = true, fetc
   }
 }
 
+const pad2 = (n) => String(n).padStart(2, '0');
+/** « JJ/MM à HH:MM » en heure locale. */
+export function stamp(ms) {
+  const d = new Date(ms);
+  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)} à ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+
 /** Texte de la notification quotidienne (EXG-11). */
 export function notificationText(report) {
   const r = report.result;
@@ -62,5 +69,7 @@ export function notificationText(report) {
       : r.verdict.level === 1
         ? 'Vêtements de pluie conseillés.'
         : 'Pas besoin de vêtements de pluie aujourd’hui.';
-  return { title, body: `${advice} ${r.gloves.label}.` };
+  // ANO-10 : une prévision ancienne (pas de réseau) est signalée dans la notification
+  const old = report.stale && Number.isFinite(report.fetchedAt) ? ` Prévision du ${stamp(report.fetchedAt)}, non mise à jour.` : '';
+  return { title, body: `${advice} ${r.gloves.label}.${old}` };
 }

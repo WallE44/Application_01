@@ -38,6 +38,8 @@ export function validateTrip(trip) {
   if (!TIME_RE.test(String(trip?.evening ?? ''))) errors.push('Heure du soir invalide (HH:MM, 24 h)');
   if (!Array.isArray(trip?.workdays) || trip.workdays.some((d) => !Number.isInteger(d) || d < 0 || d > 6)) {
     errors.push('Jours de travail invalides');
+  } else if (trip.workdays.length === 0) {
+    errors.push('Cochez au moins un jour de travail'); // ANO-05
   }
   if (!Object.hasOwn(MODES, trip?.mode ?? '')) errors.push('Mode de déplacement invalide');
   if (trip?.manualSpeed != null) {
@@ -47,6 +49,11 @@ export function validateTrip(trip) {
     }
   }
   return { ok: errors.length === 0, errors };
+}
+
+/** ANO-06 : départ du soir au plus tard égal à celui du matin (avertissement non bloquant). */
+export function eveningBeforeMorning(trip) {
+  return TIME_RE.test(String(trip?.morning)) && TIME_RE.test(String(trip?.evening)) && trip.evening <= trip.morning;
 }
 
 /** EXG-07 / RG-02 : la vitesse manuelle remplace celle du mode. */
