@@ -1,6 +1,6 @@
 # Application_01 · Cahier de recette v1.1
 
-Version 1.1 du 27/11/2026 · Recetteur : Rec_A · Pilote : manager_A · Demandeur : Roland
+Version 1.1 du 27/11/2026 · Recetteur : Rec_A · Pilote : manager_A · Demandeur : user_01
 
 ## 1. Objet et périmètre
 
@@ -21,7 +21,7 @@ Référentiels :
 | Environnement de dev | Serveur local `npm start`, Chromium (Playwright 1.63), écran S21 Ultra simulé 384 × 854, fr-FR, Europe/Paris |
 | Horloge | Figée par test (ex. vendredi 27/11/2026 07:00) pour rendre les cas reproductibles |
 | Services externes | Simulés dans les tests automatiques (l'environnement cloud n'a pas accès à Internet) |
-| Services réels | Vérifiés le 26/11/2026 depuis le navigateur intégré de l'ordinateur de Roland : Open-Meteo (3 points), API Adresse, Géoplateforme (recherche et inverse) |
+| Services réels | Vérifiés le 26/11/2026 depuis le navigateur intégré de l'ordinateur de user_01 : Open-Meteo (3 points), API Adresse, Géoplateforme (recherche et inverse) |
 | Mise en ligne GitHub Pages | Non disponible : le déploiement du 26/11 à 23:37 a échoué, la source Pages n'étant pas encore réglée sur « GitHub Actions » |
 
 Rejouer la recette : `npm run test:unit`, `npm run test:e2e`, puis `TZ=Europe/Paris node --test --test-concurrency=1 tests/recette/*.test.mjs` (la liste des constats s'affiche en fin d'exécution).
@@ -34,7 +34,7 @@ Rejouer la recette : `npm run test:unit`, `npm run test:e2e`, puis `TZ=Europe/Pa
 | Tests fonctionnels de Dev_A rejoués | 20 / 20 OK |
 | Cas de recette (Rec_A) | 38 cas : 23 OK, 5 KO, 10 réserves |
 | Anomalies | 3 majeures (dont 1 limite d'architecture à arbitrer), 6 mineures, 1 évolution |
-| Points à arbitrer avec Roland (via manager_A) | 4 |
+| Points à arbitrer avec user_01 (via manager_A) | 4 |
 | Tests à faire sur le S21 Ultra | 13 |
 
 **Mise à jour v1.1 (27/11/2026) : après corrections, toutes les anomalies retenues sont corrigées et vérifiées (section 9). Avis : recette technique, sécurité et fonctionnelle prononcée sur l'environnement de dev ; la validation finale attend les tests sur le S21 Ultra (section 7).**
@@ -55,7 +55,7 @@ Statuts : OK conforme · KO anomalie · RÉS réserve (conforme à la SDB mais g
 | REC-T04 | RG-03 | Appel réel Open-Meteo (3 points Nantes, 3 jours) | Format lu par l'app : 3 séries de 72 h, aucune valeur manquante, fuseau Europe/Paris | Conforme ; Open-Meteo arrondit lui-même les points à sa grille (≈ 0,02°) | OK |
 | REC-T05 | EXG-04 | Appels réels API Adresse et Géoplateforme depuis une autre origine (CORS) | Réponses 200, libellé « Place Royale 44000 Nantes » | Conforme, y compris le repli Géoplateforme | OK |
 | REC-T06 | ENF-05 | Mise à jour de l'app : modifier un écran sans changer `VERSION` dans `sw.js`, recharger 3 fois | La nouvelle version s'affiche | L'ancienne version reste servie indéfiniment | KO (ANO-03) |
-| REC-T07 | EXG-01 | Déploiement GitHub Pages | Site en ligne en HTTPS | Workflow « Tests et publication » du 26/11 en échec à l'étape de publication (source Pages non réglée) | RÉS (action Roland) |
+| REC-T07 | EXG-01 | Déploiement GitHub Pages | Site en ligne en HTTPS | Workflow « Tests et publication » du 26/11 en échec à l'étape de publication (source Pages non réglée) | RÉS (action user_01) |
 | REC-T08 | ENF-06 | Lecture de code : erreurs réseau, délai max 10 s, journalisation | Message clair, pas de plantage | Conforme (et test fonctionnel 17 de Dev_A) | OK |
 
 ### 4.2 Sécurité
@@ -109,18 +109,18 @@ Gravité : Majeure (à corriger avant mise en service) · Mineure (à corriger, 
 
 | ID | Gravité | Description et reproduction | Correction proposée | Pour |
 | --- | --- | --- | --- | --- |
-| ANO-01 | Majeure | Admin → Paramètres : vider un champ numérique (ex. « Cumul indispensable » ou « Seuil conseillée ») puis Enregistrer. L'app affiche « Paramètres enregistrés » et stocke 0. Conséquence : seuil « conseillée » à 0 % = vêtements de pluie conseillés tous les jours ; cumul à 0 mm = « indispensable » à la moindre goutte. Cause : `Number('')` vaut 0 dans `validateSettings`. | Décision de Roland (27/11/2026) : aucun champ vide accepté ; un champ vidé reprend la valeur par défaut de la SDB (ex. 0,5 mm, 30 %), affichée à l'admin avant enregistrement. Ajouter le cas aux tests unitaires. | Dev_A |
+| ANO-01 | Majeure | Admin → Paramètres : vider un champ numérique (ex. « Cumul indispensable » ou « Seuil conseillée ») puis Enregistrer. L'app affiche « Paramètres enregistrés » et stocke 0. Conséquence : seuil « conseillée » à 0 % = vêtements de pluie conseillés tous les jours ; cumul à 0 mm = « indispensable » à la moindre goutte. Cause : `Number('')` vaut 0 dans `validateSettings`. | Décision de user_01 (27/11/2026) : aucun champ vide accepté ; un champ vidé reprend la valeur par défaut de la SDB (ex. 0,5 mm, 30 %), affichée à l'admin avant enregistrement. Ajouter le cas aux tests unitaires. | Dev_A |
 | ANO-03 | Majeure | Une nouvelle version publiée n'arrive pas sur le téléphone si `VERSION` n'est pas modifiée à la main dans `sw.js` (cache « d'abord » sur tous les fichiers). Vérifié : après 3 rechargements, l'ancien écran reste affiché. Les corrections de cette recette risquent donc de ne jamais être livrées. | Dériver le nom du cache du commit au moment du déploiement (étape du workflow), ou servir `index.html` et les scripts « réseau d'abord, cache en secours » ; ajouter un test fonctionnel de mise à jour. | Dev_A |
-| ANO-02 | Majeure (limite d'architecture) | Les droits admin ne sont contrôlés que dans l'application : quelqu'un qui a le téléphone déverrouillé et sait utiliser les outils du navigateur peut se donner le profil admin. Inhérent au choix « sans serveur » validé en étape 1. | Décision de Roland (27/11/2026) : risque accepté pour la v1 ; à traiter comme point majeur dans les versions suivantes (contrôle des droits côté serveur). À écrire dans la SDB. | manager_A |
+| ANO-02 | Majeure (limite d'architecture) | Les droits admin ne sont contrôlés que dans l'application : quelqu'un qui a le téléphone déverrouillé et sait utiliser les outils du navigateur peut se donner le profil admin. Inhérent au choix « sans serveur » validé en étape 1. | Décision de user_01 (27/11/2026) : risque accepté pour la v1 ; à traiter comme point majeur dans les versions suivantes (contrôle des droits côté serveur). À écrire dans la SDB. | manager_A |
 | ANO-04 | Mineure | Hors ligne, une prévision d'un autre jour affiche « Mis à jour à 18:00 » sans date. | Afficher « Mis à jour le JJ/MM à HH:MM » quand ce n'est pas aujourd'hui. | Dev_A |
 | ANO-05 | Mineure | Un trajet sans aucun jour de travail est accepté. | Exiger au moins un jour, ou avertir. | Dev_A |
 | ANO-06 | Mineure | Heure du soir antérieure à l'heure du matin acceptée sans avertissement. | Avertissement non bloquant (horaires de nuit possibles). | Dev_A |
 | ANO-07 | Mineure | Le temps de refus révèle si un identifiant existe (51 ms contre 0,1 ms). | Calculer un hachage fictif quand l'identifiant est inconnu. | Dev_A |
-| ANO-08 | Mineure (vie privée) | Coordonnées envoyées à 4 décimales (≈ 11 m) à Open-Meteo. | Décision de Roland (27/11/2026) : arrondir à 2 décimales (≈ 1 km). | Dev_A |
+| ANO-08 | Mineure (vie privée) | Coordonnées envoyées à 4 décimales (≈ 11 m) à Open-Meteo. | Décision de user_01 (27/11/2026) : arrondir à 2 décimales (≈ 1 km). | Dev_A |
 | ANO-10 | Mineure | Sans réseau, la notification du matin part avec une prévision ancienne sans le signaler. | Ajouter « (prévision de HH:MM) » au texte quand elle a plus de 3 h. | Dev_A |
 | ANO-09 | Évolution | Pas de vue « demain » : inutile le soir et le week-end pour préparer ses affaires. | Ajouter un onglet « Demain » (prochain jour travaillé) en v1.1 ou v2 (P3). | manager_A |
 
-## 6. Points à arbitrer avec Roland (par manager_A)
+## 6. Points à arbitrer avec user_01 (par manager_A)
 
 | ID | Question | Recommandation de Rec_A |
 | --- | --- | --- |
@@ -129,7 +129,7 @@ Gravité : Majeure (à corriger avant mise en service) · Mineure (à corriger, 
 | P3 | ANO-09 : ajouter une vue « demain » ? | **Tranché le 27/11** : oui, vue « demain » en v1.1. |
 | P4 | Mot de passe admin oublié : accepter qu'il faille tout effacer ? | **Tranché le 27/11** : accepté en v1, procédure à écrire dans le README. |
 
-## 7. Tests à faire par Roland sur le Samsung S21 Ultra
+## 7. Tests à faire par user_01 sur le Samsung S21 Ultra
 
 Préalable : régler GitHub → Settings → Pages → Source : GitHub Actions, puis relancer le workflow « Tests et publication ». Adresse : https://walle44.github.io/Application_01/
 
@@ -146,7 +146,7 @@ Préalable : régler GitHub → Settings → Pages → Source : GitHub Actions, 
 | D09 | EXG-07 | Vitesse manuelle « 12,5 » avec le clavier Samsung | Accepté, durée recalculée |
 | D10 | EXG-11 | Préférences → Activer les notifications ; noter le message affiché ; laisser l'app fermée jusqu'au lendemain d'un jour travaillé | Une seule notification entre 07:30 et le départ du soir (« au mieux ») |
 | D11 | EXG-15, ENF-07 | Utiliser l'app d'une main, dehors en plein jour, en thème sombre puis clair | Tout est lisible et atteignable au pouce |
-| D12 | Métier | Pendant 5 jours travaillés, noter le verdict du matin et la pluie réellement subie | Verdict jugé fiable par Roland |
+| D12 | Métier | Pendant 5 jours travaillés, noter le verdict du matin et la pluie réellement subie | Verdict jugé fiable par user_01 |
 | D13 | ENF-09 | Chrome → ⋮ → Paramètres → Paramètres des sites → walle44.github.io | Seules les autorisations Notifications et Position, aucune autre |
 
 ## 8. Fichiers de la recette
@@ -163,23 +163,23 @@ Les tests de recette ont été transformés en tests de non-régression : ils é
 | Anomalie | Vérification | Statut |
 | --- | --- | --- |
 | ANO-01 | Champ vidé : « Paramètres enregistrés. Champ vide remis à sa valeur par défaut : Cumul « indispensable » (mm) : 0,5 », valeur 0,5 réaffichée et stockée ; la valeur par défaut est indiquée sous chaque champ | Corrigée |
-| ANO-02 | Risque accepté par Roland pour la v1 ; écrit dans le README (limites connues) ; point majeur des versions suivantes | Acceptée |
+| ANO-02 | Risque accepté par user_01 pour la v1 ; écrit dans le README (limites connues) ; point majeur des versions suivantes | Acceptée |
 | ANO-03 | Nouvelle version publiée (VERSION suffixée comme le fait le workflow) : affichée dès la réouverture, puis disponible hors-ligne | Corrigée |
 | ANO-04 | Prévision de la veille : « Mis à jour le 26/11 à 18:00 » | Corrigée |
 | ANO-05 | Trajet sans jour coché : « Cochez au moins un jour de travail » | Corrigée |
 | ANO-06 | Matin 18:00, soir 08:00 : avertissement, puis « Enregistrer quand même » enregistre | Corrigée |
 | ANO-07 | Temps de refus équivalent pour un identifiant existant ou inconnu | Corrigée |
 | ANO-08 | Open-Meteo reçoit `latitude=47.22` au lieu de `47.2153` | Corrigée |
-| ANO-09 | Vue « demain » prévue en v1.1 (décision de Roland) | Reportée |
+| ANO-09 | Vue « demain » prévue en v1.1 (décision de user_01) | Reportée |
 | ANO-10 | Notification hors-ligne : « Prévision du 26/11 à 18:05, non mise à jour. » | Corrigée |
 | P4 | Procédure « mot de passe administrateur oublié » dans le README | Fait |
 
-Reste à faire : publication GitHub Pages (réglage Source par Roland), puis les tests D01 à D13 sur le S21 Ultra.
+Reste à faire : publication GitHub Pages (réglage Source par user_01), puis les tests D01 à D13 sur le S21 Ultra.
 
 ## 10. Historique
 
 | Version | Date | Auteur | Changement |
 | --- | --- | --- | --- |
 | v1.0 | 26/11/2026 | Rec_A | Première recette sur `main` (commit 2a154c6) |
-| v1.0.1 | 27/11/2026 | Rec_A | ANO-01 : correction décidée par Roland (valeur par défaut de la SDB) ; ANO-02 / P1 : risque accepté en v1, point majeur des versions suivantes ; P2 arrondi validé, P3 vue « demain » en v1.1, P4 accepté avec procédure README |
+| v1.0.1 | 27/11/2026 | Rec_A | ANO-01 : correction décidée par user_01 (valeur par défaut de la SDB) ; ANO-02 / P1 : risque accepté en v1, point majeur des versions suivantes ; P2 arrondi validé, P3 vue « demain » en v1.1, P4 accepté avec procédure README |
 | v1.1 | 27/11/2026 | Rec_A | Re-recette des corrections v1.0.1 (section 9) |

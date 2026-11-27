@@ -1,6 +1,6 @@
 # Application_01 · Cahier de développement v1.0
 
-Rédigé par Dev_A le 26/11/2026, sur la base de la SDB v0.1 validée par Roland le 26/11/2026. Ce cahier trace chaque exigence de la SDB jusqu'à sa preuve de validation. Il est soumis à la validation de Roland avant la recette (Rec_A, étape 3).
+Rédigé par Dev_A le 26/11/2026, sur la base de la SDB v0.1 validée par user_01 le 26/11/2026. Ce cahier trace chaque exigence de la SDB jusqu'à sa preuve de validation. Il est soumis à la validation de user_01 avant la recette (Rec_A, étape 3).
 
 ## 1. Synthèse
 
@@ -90,7 +90,7 @@ La recherche d'adresse envoie aussi le texte tapé à l'API Adresse, ce qui est 
 - Application fermée : enregistrement de la synchronisation périodique ; quand Chrome la déclenche entre l'heure réglée et le départ du soir, la prévision est rafraîchie et la notification envoyée, une seule fois par jour, jamais un jour non travaillé.
 - Ouvrir l'application affiche toujours le verdict à jour, ce qui couvre le besoin si la notification arrive en retard.
 
-**Options pour la révision de la SDB, à arbitrer par manager_A avec Roland.**
+**Options pour la révision de la SDB, à arbitrer par manager_A avec user_01.**
 1. Accepter la notification « au mieux » et retirer le délai de 15 min du critère (aucun coût, aucune donnée hors du téléphone).
 2. Ajouter un envoi planifié par GitHub Actions (Web Push) : pas de serveur à maintenir, mais les coordonnées du trajet seraient stockées en secret GitHub (contraire à ENF-09 « tout reste sur le téléphone ») et les tâches planifiées de GitHub ont souvent 5 à 30 min de retard.
 3. Ajouter un petit serveur de notification (Web Push) : délai tenu, mais contraire au choix validé « sans serveur » et avec un coût d'hébergement.
@@ -99,7 +99,7 @@ Dev_A recommande l'option 1 pour la v1.
 
 ## 7. Interprétations et limites à connaître
 
-Ces points ne contredisent pas la SDB mais précisent ce qu'elle ne disait pas. Ils sont soumis à la validation de Roland.
+Ces points ne contredisent pas la SDB mais précisent ce qu'elle ne disait pas. Ils sont soumis à la validation de user_01.
 
 | Sujet | Choix de Dev_A |
 | --- | --- |
@@ -125,7 +125,7 @@ Ces points ne contredisent pas la SDB mais précisent ce qu'elle ne disait pas. 
 | Notification envoyée deux fois | Deux contrôles simultanés (premier plan + minuterie) | Un seul contrôle à la fois, jour marqué avant l'affichage, revérification après l'appel météo | U « pas de doublon », « échec d'affichage » ; F « EXG-11 » |
 | Un échec d'écriture du journal pouvait bloquer les écritures suivantes | Chaîne de promesses rejetée | Erreur du journal isolée | U « EXG-14 » |
 
-## 9. Vérifications à faire sur le Samsung S21 Ultra (par Roland ou Rec_A)
+## 9. Vérifications à faire sur le Samsung S21 Ultra (par user_01 ou Rec_A)
 
 1. Ouvrir l'adresse GitHub Pages dans Chrome, installer l'application : l'icône apparaît, l'app s'ouvre en plein écran (EXG-01).
 2. Chercher une vraie adresse : des suggestions s'affichent (API Adresse réelle).
@@ -147,7 +147,7 @@ npm run test:e2e    # 20 tests fonctionnels
 
 ## 12. Corrections v1.0.1 (anomalies de la recette v1.0)
 
-Décision de Roland du 27/11/2026 : corriger toutes les anomalies (majeures et mineures). ANO-02 est accepté en v1 (point majeur des versions suivantes) et ANO-09 (vue « demain ») est prévu en v1.1.
+Décision de user_01 du 27/11/2026 : corriger toutes les anomalies (majeures et mineures). ANO-02 est accepté en v1 (point majeur des versions suivantes) et ANO-09 (vue « demain ») est prévu en v1.1.
 
 | Anomalie | Correction | Preuve |
 | --- | --- | --- |

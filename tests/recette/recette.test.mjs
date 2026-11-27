@@ -86,30 +86,30 @@ test('REC-S01 Paramètre admin laissé vide : valeur par défaut de la SDB (ANO-
 test('REC-S02 Identifiant avec balises HTML refusé', async () => {
   const store = memoryStore();
   const auth = createAuth({ store, volatile: memoryStore(), iterations: 1000 });
-  await auth.setupAdmin('roland', 'Secret#2026');
+  await auth.setupAdmin('user_01', 'Secret#2026');
   await assert.rejects(auth.createAccount({ username: '<img src=x onerror=alert(1)>', password: 'Secret#2026', role: 'user' }), /Identifiant/);
   await assert.rejects(auth.createAccount({ username: 'eve', password: 'Secret#2026', role: 'root' }), /Profil/);
   await assert.rejects(auth.createAccount({ username: 'eve', password: 'court', role: 'user' }), /8 caractères/);
-  await assert.rejects(auth.createAccount({ username: 'ROLAND', password: 'Secret#2026', role: 'user' }), /existe déjà/);
+  await assert.rejects(auth.createAccount({ username: 'USER_01', password: 'Secret#2026', role: 'user' }), /existe déjà/);
 });
 
 test('REC-S03 Verrouillage après 5 échecs, même avec le bon mot de passe ensuite', async () => {
   const store = memoryStore();
   let t = 1_000_000;
   const auth = createAuth({ store, volatile: memoryStore(), iterations: 1000, now: () => t });
-  await auth.setupAdmin('roland', 'Secret#2026');
-  for (let i = 0; i < 5; i++) assert.equal((await auth.login('roland', 'faux-mdp', false)).ok, false);
-  const blocked = await auth.login('roland', 'Secret#2026', false);
+  await auth.setupAdmin('user_01', 'Secret#2026');
+  for (let i = 0; i < 5; i++) assert.equal((await auth.login('user_01', 'faux-mdp', false)).ok, false);
+  const blocked = await auth.login('user_01', 'Secret#2026', false);
   assert.equal(blocked.ok, false);
   assert.match(blocked.error, /Trop d'essais/);
   t += 31_000;
-  assert.equal((await auth.login('roland', 'Secret#2026', false)).ok, true);
+  assert.equal((await auth.login('user_01', 'Secret#2026', false)).ok, true);
 });
 
 test('REC-S04 Dernier administrateur protégé ; un admin ne peut pas se supprimer', async () => {
   const store = memoryStore();
   const auth = createAuth({ store, volatile: memoryStore(), iterations: 1000 });
-  const admin = await auth.setupAdmin('roland', 'Secret#2026');
+  const admin = await auth.setupAdmin('user_01', 'Secret#2026');
   await assert.rejects(auth.updateAccount(admin.id, { role: 'user' }), /au moins un administrateur/);
   await assert.rejects(auth.deleteAccount(admin.id, admin.id), /propre compte/);
 });
@@ -117,14 +117,14 @@ test('REC-S04 Dernier administrateur protégé ; un admin ne peut pas se supprim
 test('REC-S05 Énumération des identifiants par le temps de réponse (ANO-07)', async () => {
   const store = memoryStore();
   const auth = createAuth({ store, volatile: memoryStore(), iterations: 310000, now: () => Date.now() });
-  await auth.setupAdmin('roland', 'Secret#2026');
+  await auth.setupAdmin('user_01', 'Secret#2026');
   const time = async (u) => {
     const t0 = performance.now();
     await auth.login(u, 'faux-mdp-123', false);
     await store.set(KEYS.loginGuard, { failed: 0, lockedUntil: 0 });
     return performance.now() - t0;
   };
-  const known = await time('roland');
+  const known = await time('user_01');
   const unknown = await time('inconnu');
   if (known > unknown * 5) note('ANO-07', `Identifiant existant : refus en ${known.toFixed(0)} ms ; inexistant : ${unknown.toFixed(1)} ms. Le temps de réponse révèle si un identifiant existe.`);
   assert.ok(unknown > known * 0.5, `ANO-07 corrigée : ${unknown.toFixed(0)} ms contre ${known.toFixed(0)} ms`);

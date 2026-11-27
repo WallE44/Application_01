@@ -52,7 +52,7 @@ test('ANO-10 notification : prévision ancienne signalée', () => {
 test('ANO-07 identifiant inconnu : même calcul de hachage', async () => {
   const store = memoryStore();
   const auth = createAuth({ store, volatile: memoryStore(), iterations: 200000 });
-  await auth.setupAdmin('roland', 'Secret#2026');
+  await auth.setupAdmin('user_01', 'Secret#2026');
   const time = async (u) => {
     const t0 = performance.now();
     await auth.login(u, 'faux-mdp-123', false);
@@ -60,7 +60,7 @@ test('ANO-07 identifiant inconnu : même calcul de hachage', async () => {
     return performance.now() - t0;
   };
   await time('inconnu'); // préchauffage
-  const known = await time('roland');
+  const known = await time('user_01');
   const unknown = await time('inconnu');
   assert.ok(unknown > known * 0.5, `inconnu ${unknown.toFixed(0)} ms, connu ${known.toFixed(0)} ms`);
 });

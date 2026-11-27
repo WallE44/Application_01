@@ -31,7 +31,7 @@ Conseil : créer un second compte administrateur de secours, ou noter le mot de 
 
 ## Limites connues (v1)
 
-- Les droits administrateur sont contrôlés par l'application sur le téléphone. Une personne ayant le téléphone déverrouillé et les outils de développement de Chrome pourrait les contourner. Risque accepté pour la v1 (Roland, 27/11/2026) ; point majeur des versions suivantes.
+- Les droits administrateur sont contrôlés par l'application sur le téléphone. Une personne ayant le téléphone déverrouillé et les outils de développement de Chrome pourrait les contourner. Risque accepté pour la v1 (user_01, 27/11/2026) ; point majeur des versions suivantes.
 
 ## Développement
 
