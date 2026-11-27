@@ -95,7 +95,7 @@ test('ENF-03 / ENF-09 HTTPS uniquement, seules les coordonnées partent vers les
     for (const u of env.weatherCalls) {
       const keys = [...new URL(u).searchParams.keys()].sort();
       assert.deepEqual(keys, ['forecast_days', 'hourly', 'latitude', 'longitude', 'timezone']);
-      assert.equal(u.includes('roland'), false);
+      assert.equal(u.includes('user_01'), false);
     }
     const csp = await page.getAttribute('meta[http-equiv=Content-Security-Policy]', 'content');
     assert.match(csp, /default-src 'self'/);

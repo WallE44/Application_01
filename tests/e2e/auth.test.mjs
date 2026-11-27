@@ -18,11 +18,11 @@ test('EXG-02 premier lancement, déconnexion, mauvais mot de passe refusé, conn
     await page.goto(base + '#/preferences');
     await page.click('#logout');
     await page.waitForSelector('#login-user');
-    await login(page, 'roland', 'mauvais-mdp');
+    await login(page, 'user_01', 'mauvais-mdp');
     await page.waitForSelector('[role=alert]');
     assert.match(await page.textContent('[role=alert]'), /Identifiant ou mot de passe incorrect/);
     await shot(page, '02-connexion-refusee');
-    await login(page, 'roland', 'Secret#2026');
+    await login(page, 'user_01', 'Secret#2026');
     await page.waitForSelector('#nav a:has-text("Accueil")');
     assert.equal(new URL(page.url()).hash, '#/accueil');
   } finally {
@@ -59,7 +59,7 @@ test('EXG-02 « rester connecté » : pas de nouvelle saisie après redémarrage
     // Déconnexion puis connexion SANS l'option
     await r.page.goto(base + '#/preferences');
     await r.page.click('#logout');
-    await login(r.page, 'roland', 'Secret#2026', false);
+    await login(r.page, 'user_01', 'Secret#2026', false);
     await r.page.waitForSelector('#nav a:has-text("Accueil")');
   } finally {
     await r.context.close();
@@ -104,7 +104,7 @@ test('EXG-03 / ENF-02 gestion des comptes ; un compte utilisateur ne voit ni n�
     await page.waitForSelector('text=Compte « paul » supprimé.');
     assert.equal(await page.locator('#accounts li').count(), 2);
     // Pas de bouton de suppression sur son propre compte
-    assert.equal(await page.locator('#del-roland').count(), 0);
+    assert.equal(await page.locator('#del-user_01').count(), 0);
 
     // Connexion en utilisateur
     await page.goto(base + '#/preferences');
@@ -127,7 +127,7 @@ test('ENF-01 mots de passe hachés (PBKDF2 + sel), jamais en clair dans le stock
   const env = await startEnv();
   const { page, base } = env;
   try {
-    await setupAdmin(page, base, 'roland', 'Secret#2026');
+    await setupAdmin(page, base, 'user_01', 'Secret#2026');
     await page.goto(base + '#/admin/comptes');
     await page.fill('#new-user', 'marie');
     await page.fill('#new-pw', 'MotDePasseMarie');

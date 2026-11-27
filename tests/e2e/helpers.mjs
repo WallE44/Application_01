@@ -109,7 +109,7 @@ export async function shot(page, name) {
 }
 
 /** Premier lancement : crée l'admin (reste connecté) et arrive sur « Mon trajet ». */
-export async function setupAdmin(page, base, username = 'roland', password = 'Secret#2026') {
+export async function setupAdmin(page, base, username = 'user_01', password = 'Secret#2026') {
   await page.goto(base);
   await page.fill('#setup-user', username);
   await page.fill('#setup-pw', password);
