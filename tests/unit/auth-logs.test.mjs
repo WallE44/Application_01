@@ -33,10 +33,10 @@ test('EXG-02 premier lancement, connexion, mauvais mot de passe refusé', async 
   const { auth, store } = setup();
   assert.equal(await auth.hasAccounts(), false);
   await assert.rejects(auth.createAccount({ username: 'bob', password: '12345678', role: 'user' }), /administrateur/);
-  await auth.setupAdmin('roland', 'Secret#2026');
+  await auth.setupAdmin('user_01', 'Secret#2026');
   await assert.rejects(auth.setupAdmin('autre', 'Secret#2026'), /existe déjà/);
-  assert.equal((await auth.login('roland', 'mauvais!!', false)).ok, false);
-  const ok = await auth.login('ROLAND', 'Secret#2026', false);
+  assert.equal((await auth.login('user_01', 'mauvais!!', false)).ok, false);
+  const ok = await auth.login('USER_01', 'Secret#2026', false);
   assert.equal(ok.ok, true);
   assert.equal(ok.user.role, 'admin');
   assert.equal(ok.user.password, undefined, 'le hash n’est jamais exposé');
@@ -47,35 +47,35 @@ test('EXG-02 premier lancement, connexion, mauvais mot de passe refusé', async 
 
 test('EXG-02 « rester connecté » : session persistante vs session volatile', async () => {
   const { auth, store, volatile, clock } = setup();
-  await auth.setupAdmin('roland', 'Secret#2026');
-  await auth.login('roland', 'Secret#2026', true);
+  await auth.setupAdmin('user_01', 'Secret#2026');
+  await auth.login('user_01', 'Secret#2026', true);
   assert.ok(await store.get(KEYS.session));
   await volatile.del(KEYS.session); // simulateur de redémarrage : la mémoire volatile est perdue
-  assert.equal((await auth.currentUser()).username, 'roland', 'toujours connecté après redémarrage');
+  assert.equal((await auth.currentUser()).username, 'user_01', 'toujours connecté après redémarrage');
   clock.advance(REMEMBER_MS + 1);
   assert.equal(await auth.currentUser(), null, 'session expirée');
 
-  await auth.login('roland', 'Secret#2026', false);
+  await auth.login('user_01', 'Secret#2026', false);
   assert.equal(await store.get(KEYS.session), undefined);
-  assert.equal((await auth.currentUser()).username, 'roland');
+  assert.equal((await auth.currentUser()).username, 'user_01');
   await volatile.del(KEYS.session); // redémarrage
   assert.equal(await auth.currentUser(), null, 'sans l’option, nouvelle saisie requise');
 });
 
 test('Sécurité : blocage après 5 échecs pendant 30 s', async () => {
   const { auth, clock } = setup();
-  await auth.setupAdmin('roland', 'Secret#2026');
-  for (let i = 0; i < MAX_FAILED; i++) await auth.login('roland', 'faux-faux', false);
-  const locked = await auth.login('roland', 'Secret#2026', false);
+  await auth.setupAdmin('user_01', 'Secret#2026');
+  for (let i = 0; i < MAX_FAILED; i++) await auth.login('user_01', 'faux-faux', false);
+  const locked = await auth.login('user_01', 'Secret#2026', false);
   assert.equal(locked.ok, false);
   assert.match(locked.error, /Trop d'essais/);
   clock.advance(LOCK_MS + 1);
-  assert.equal((await auth.login('roland', 'Secret#2026', false)).ok, true);
+  assert.equal((await auth.login('user_01', 'Secret#2026', false)).ok, true);
 });
 
 test('EXG-03 créer, modifier, supprimer un compte et son profil', async () => {
   const { auth, store } = setup();
-  const admin = await auth.setupAdmin('roland', 'Secret#2026');
+  const admin = await auth.setupAdmin('user_01', 'Secret#2026');
   const u = await auth.createAccount({ username: 'marie', password: 'Password1', role: 'user' });
   await assert.rejects(auth.createAccount({ username: 'Marie', password: 'Password1', role: 'user' }), /existe déjà/);
   await assert.rejects(auth.createAccount({ username: 'x', password: 'Password1', role: 'user' }), /Identifiant/);
@@ -103,7 +103,7 @@ test('EXG-03 créer, modifier, supprimer un compte et son profil', async () => {
 
 test('ENF-02 un compte utilisateur n’accède pas aux écrans admin ; profil relu à chaque fois', async () => {
   const { auth } = setup();
-  await auth.setupAdmin('roland', 'Secret#2026');
+  await auth.setupAdmin('user_01', 'Secret#2026');
   const u = await auth.createAccount({ username: 'marie', password: 'Password1', role: 'user' });
   await auth.login('marie', 'Password1', true);
   const me = await auth.currentUser();
@@ -116,12 +116,12 @@ test('ENF-02 un compte utilisateur n’accède pas aux écrans admin ; profil re
 
 test('Compte supprimé → session invalidée ; déconnexion', async () => {
   const { auth } = setup();
-  const admin = await auth.setupAdmin('roland', 'Secret#2026');
+  const admin = await auth.setupAdmin('user_01', 'Secret#2026');
   const u = await auth.createAccount({ username: 'marie', password: 'Password1', role: 'user' });
   await auth.login('marie', 'Password1', true);
   await auth.deleteAccount(u.id, admin.id);
   assert.equal(await auth.currentUser(), null);
-  await auth.login('roland', 'Secret#2026', true);
+  await auth.login('user_01', 'Secret#2026', true);
   await auth.logout();
   assert.equal(await auth.currentUser(), null);
   await auth.logout(); // sans session : sans erreur
@@ -143,10 +143,10 @@ test('EXG-14 journaux : 200 derniers, datés, du plus récent au plus ancien', a
 
 test('EXG-14 les connexions sont journalisées', async () => {
   const { auth, logger } = setup();
-  await auth.setupAdmin('roland', 'Secret#2026');
-  await auth.login('roland', 'faux-faux', false);
-  await auth.login('roland', 'Secret#2026', false);
+  await auth.setupAdmin('user_01', 'Secret#2026');
+  await auth.login('user_01', 'faux-faux', false);
+  await auth.login('user_01', 'Secret#2026', false);
   const msgs = (await logger.list()).map((e) => e.message);
   assert.ok(msgs.some((m) => m.startsWith('Échec de connexion')));
-  assert.ok(msgs.some((m) => m.startsWith('Connexion de « roland »')));
+  assert.ok(msgs.some((m) => m.startsWith('Connexion de « user_01 »')));
 });
