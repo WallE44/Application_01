@@ -114,7 +114,7 @@ Gravité : Majeure (à corriger avant mise en service) · Mineure (à corriger, 
 | ANO-05 | Mineure | Un trajet sans aucun jour de travail est accepté. | Exiger au moins un jour, ou avertir. | Dev_A |
 | ANO-06 | Mineure | Heure du soir antérieure à l'heure du matin acceptée sans avertissement. | Avertissement non bloquant (horaires de nuit possibles). | Dev_A |
 | ANO-07 | Mineure | Le temps de refus révèle si un identifiant existe (51 ms contre 0,1 ms). | Calculer un hachage fictif quand l'identifiant est inconnu. | Dev_A |
-| ANO-08 | Mineure (vie privée) | Coordonnées envoyées à 4 décimales (≈ 11 m) à Open-Meteo. | Arrondir à 2 décimales (≈ 1 km), sans perte de précision météo (P2). | manager_A puis Dev_A |
+| ANO-08 | Mineure (vie privée) | Coordonnées envoyées à 4 décimales (≈ 11 m) à Open-Meteo. | Décision de Roland (27/11/2026) : arrondir à 2 décimales (≈ 1 km). | Dev_A |
 | ANO-10 | Mineure | Sans réseau, la notification du matin part avec une prévision ancienne sans le signaler. | Ajouter « (prévision de HH:MM) » au texte quand elle a plus de 3 h. | Dev_A |
 | ANO-09 | Évolution | Pas de vue « demain » : inutile le soir et le week-end pour préparer ses affaires. | Ajouter un onglet « Demain » (prochain jour travaillé) en v1.1 ou v2 (P3). | manager_A |
 
@@ -123,9 +123,9 @@ Gravité : Majeure (à corriger avant mise en service) · Mineure (à corriger, 
 | ID | Question | Recommandation de Rec_A |
 | --- | --- | --- |
 | P1 | ANO-02 : accepter que la séparation admin/utilisateur ne protège pas contre une personne qui a le téléphone en main et les compétences techniques ? | **Tranché le 27/11** : accepté en v1, point majeur des versions suivantes. |
-| P2 | ANO-08 : envoyer des coordonnées arrondies à ≈ 1 km plutôt qu'à ≈ 11 m ? | Oui : même qualité de prévision, meilleure confidentialité. |
-| P3 | ANO-09 : ajouter une vue « demain » ? | Oui en v1.1 : c'est l'usage du soir et du week-end. |
-| P4 | Mot de passe admin oublié : accepter qu'il faille tout effacer ? | Accepter en v1, avec la procédure écrite dans le README. |
+| P2 | ANO-08 : envoyer des coordonnées arrondies à ≈ 1 km plutôt qu'à ≈ 11 m ? | **Tranché le 27/11** : oui, coordonnées arrondies à ≈ 1 km (correction Dev_A). |
+| P3 | ANO-09 : ajouter une vue « demain » ? | **Tranché le 27/11** : oui, vue « demain » en v1.1. |
+| P4 | Mot de passe admin oublié : accepter qu'il faille tout effacer ? | **Tranché le 27/11** : accepté en v1, procédure à écrire dans le README. |
 
 ## 7. Tests à faire par Roland sur le Samsung S21 Ultra
 
@@ -159,4 +159,4 @@ Préalable : régler GitHub → Settings → Pages → Source : GitHub Actions, 
 | Version | Date | Auteur | Changement |
 | --- | --- | --- | --- |
 | v1.0 | 26/11/2026 | Rec_A | Première recette sur `main` (commit 2a154c6) |
-| v1.0.1 | 27/11/2026 | Rec_A | ANO-01 : correction décidée par Roland (valeur par défaut de la SDB) ; ANO-02 / P1 : risque accepté en v1, point majeur des versions suivantes |
+| v1.0.1 | 27/11/2026 | Rec_A | ANO-01 : correction décidée par Roland (valeur par défaut de la SDB) ; ANO-02 / P1 : risque accepté en v1, point majeur des versions suivantes ; P2 arrondi validé, P3 vue « demain » en v1.1, P4 accepté avec procédure README |
