@@ -107,7 +107,7 @@ Gravité : Majeure (à corriger avant mise en service) · Mineure (à corriger, 
 
 | ID | Gravité | Description et reproduction | Correction proposée | Pour |
 | --- | --- | --- | --- | --- |
-| ANO-01 | Majeure | Admin → Paramètres : vider un champ numérique (ex. « Cumul indispensable » ou « Seuil conseillée ») puis Enregistrer. L'app affiche « Paramètres enregistrés » et stocke 0. Conséquence : seuil « conseillée » à 0 % = vêtements de pluie conseillés tous les jours ; cumul à 0 mm = « indispensable » à la moindre goutte. Cause : `Number('')` vaut 0 dans `validateSettings`. | Refuser une chaîne vide (« valeur obligatoire ») et ajouter le cas aux tests unitaires. | Dev_A |
+| ANO-01 | Majeure | Admin → Paramètres : vider un champ numérique (ex. « Cumul indispensable » ou « Seuil conseillée ») puis Enregistrer. L'app affiche « Paramètres enregistrés » et stocke 0. Conséquence : seuil « conseillée » à 0 % = vêtements de pluie conseillés tous les jours ; cumul à 0 mm = « indispensable » à la moindre goutte. Cause : `Number('')` vaut 0 dans `validateSettings`. | Décision de Roland (27/11/2026) : aucun champ vide accepté ; un champ vidé reprend la valeur par défaut de la SDB (ex. 0,5 mm, 30 %), affichée à l'admin avant enregistrement. Ajouter le cas aux tests unitaires. | Dev_A |
 | ANO-03 | Majeure | Une nouvelle version publiée n'arrive pas sur le téléphone si `VERSION` n'est pas modifiée à la main dans `sw.js` (cache « d'abord » sur tous les fichiers). Vérifié : après 3 rechargements, l'ancien écran reste affiché. Les corrections de cette recette risquent donc de ne jamais être livrées. | Dériver le nom du cache du commit au moment du déploiement (étape du workflow), ou servir `index.html` et les scripts « réseau d'abord, cache en secours » ; ajouter un test fonctionnel de mise à jour. | Dev_A |
 | ANO-02 | Majeure (limite d'architecture) | Les droits admin ne sont contrôlés que dans l'application : quelqu'un qui a le téléphone déverrouillé et sait utiliser les outils du navigateur peut se donner le profil admin. Inhérent au choix « sans serveur » validé en étape 1. | Pas de correction technique raisonnable sans serveur. Proposer d'accepter ce risque et de l'écrire dans la SDB (P1). | manager_A |
 | ANO-04 | Mineure | Hors ligne, une prévision d'un autre jour affiche « Mis à jour à 18:00 » sans date. | Afficher « Mis à jour le JJ/MM à HH:MM » quand ce n'est pas aujourd'hui. | Dev_A |
@@ -159,3 +159,4 @@ Préalable : régler GitHub → Settings → Pages → Source : GitHub Actions, 
 | Version | Date | Auteur | Changement |
 | --- | --- | --- | --- |
 | v1.0 | 26/11/2026 | Rec_A | Première recette sur `main` (commit 2a154c6) |
+| v1.0.1 | 27/11/2026 | Rec_A | ANO-01 : correction décidée par Roland (valeur par défaut de la SDB) |
