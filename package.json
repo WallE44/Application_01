@@ -1,15 +1,16 @@
 {
   "name": "application-01",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "PWA météo trajet domicile-travail : faut-il prendre ses vêtements de pluie ?",
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.mjs app 8080",
-    "test": "npm run test:unit && npm run test:e2e",
+    "test": "npm run test:unit && npm run test:e2e && npm run test:recette",
     "test:unit": "TZ=Europe/Paris node --test --experimental-test-coverage --test-coverage-include='app/js/core/{geo,rules,forecast,settings,weather}.js' --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 'tests/unit/*.test.mjs'",
     "test:unit:all": "TZ=Europe/Paris node --test --experimental-test-coverage --test-coverage-include='app/js/core/**' 'tests/unit/*.test.mjs'",
-    "test:e2e": "TZ=Europe/Paris node --test --test-concurrency=1 'tests/e2e/*.test.mjs'"
+    "test:e2e": "TZ=Europe/Paris node --test --test-concurrency=1 'tests/e2e/*.test.mjs'",
+    "test:recette": "TZ=Europe/Paris node --test --test-concurrency=1 'tests/recette/*.test.mjs'"
   },
   "engines": {
     "node": ">=22"

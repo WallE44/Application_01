@@ -10,7 +10,7 @@ import { renderPrefs } from './screens/prefs.js';
 import { renderAdminAccounts, renderAdminLogs, renderAdminParams } from './screens/admin.js';
 import { startNotificationScheduler } from './notifications.js';
 
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '1.0.1';
 
 const ROUTES = {
   '/accueil': { render: renderHome, role: 'user', title: 'Accueil' },
@@ -131,6 +131,15 @@ window.addEventListener('error', (e) => logger.log('error', `JS : ${e.message}`)
 window.addEventListener('unhandledrejection', (e) => logger.log('error', `JS : ${e.reason?.message ?? e.reason}`));
 
 if ('serviceWorker' in navigator) {
+  // ANO-03 : quand une nouvelle version prend la main, on recharge une fois pour l'afficher tout de suite
+  // (pas au tout premier lancement, où il n'y avait pas encore de version installée).
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloading) return;
+    reloading = true;
+    location.reload();
+  });
   navigator.serviceWorker.register('sw.js', { type: 'module' }).catch((e) => logger.log('error', `Service worker : ${e.message}`));
 }
 

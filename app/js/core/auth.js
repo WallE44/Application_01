@@ -40,6 +40,9 @@ export function createAuth({ store, volatile, logger, now = () => Date.now(), it
   const saveAccounts = (list) => store.set(KEYS.accounts, list);
   const log = (type, msg) => logger?.log(type, msg);
 
+  let dummy;
+  const dummyRecord = () => (dummy ??= { algo: 'PBKDF2-SHA256', iterations, salt: randomHex(16), hash: randomHex(32) });
+
   async function adminCount(list) {
     return list.filter((a) => a.role === 'admin').length;
   }
@@ -65,7 +68,8 @@ export function createAuth({ store, volatile, logger, now = () => Date.now(), it
         return { ok: false, error: `Trop d'essais. Réessayez dans ${s} s.` };
       }
       const acc = (await accounts()).find((a) => a.username.toLowerCase() === String(username).toLowerCase());
-      const good = acc ? await verifyPassword(password, acc.password) : false;
+      // ANO-07 : même calcul de hachage que l'identifiant existe ou non (temps de réponse identique)
+      const good = acc ? await verifyPassword(password, acc.password) : (await verifyPassword(String(password), dummyRecord()), false);
       if (!good) {
         guard.failed += 1;
         if (guard.failed >= MAX_FAILED) {

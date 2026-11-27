@@ -9,7 +9,7 @@ import { memoryStore, KEYS } from '../../app/js/core/store.js';
 import { pointLevel, dayVerdict, nearestFullHour, validateTrip, shouldNotify } from '../../app/js/core/rules.js';
 import { validateSettings, DEFAULT_SETTINGS } from '../../app/js/core/settings.js';
 import { buildForecastUrl } from '../../app/js/core/weather.js';
-import { dumpDb, fillTrip, FRIDAY_0700, login, setClock, setupAdmin, startEnv } from '../e2e/helpers.mjs';
+import { dumpDb, fillTrip, FRIDAY_0700, login, setClock, setTime, setupAdmin, startEnv } from '../e2e/helpers.mjs';
 
 const S = DEFAULT_SETTINGS;
 export const findings = [];
@@ -40,17 +40,16 @@ test('REC-F03 RG-03 arrondi à l’heure pleine (08:29 → 08:00, 08:30 → 09:0
   assert.equal(n.getHours(), 0);
 });
 
-test('REC-F04 Trajet sans aucun jour de travail coché (constat ANO-05)', () => {
+test('REC-F04 Trajet sans aucun jour de travail coché : refusé (ANO-05)', () => {
   const trip = { a: { lat: 47, lon: -1.5 }, b: { lat: 47.1, lon: -1.5 }, morning: '08:00', evening: '17:30', workdays: [], mode: 'bike', manualSpeed: null };
   const v = validateTrip(trip);
   if (v.ok) note('ANO-05', 'Un trajet sans aucun jour de travail est accepté sans avertissement : aucun verdict ni notification ne sera jamais produit.');
-  assert.ok(true);
+  assert.equal(v.ok, false, 'ANO-05 corrigée : au moins un jour exigé');
 });
 
-test('REC-F05 Départ du soir avant le départ du matin (constat ANO-06)', () => {
+test('REC-F05 Départ du soir avant le départ du matin : accepté par les règles, avertissement à l’écran (ANO-06, voir REC-F10)', () => {
   const trip = { a: { lat: 47, lon: -1.5 }, b: { lat: 47.1, lon: -1.5 }, morning: '18:00', evening: '08:00', workdays: [1], mode: 'bike', manualSpeed: null };
-  if (validateTrip(trip).ok) note('ANO-06', 'Heures inversées (matin 18:00, soir 08:00) acceptées sans avertissement.');
-  assert.ok(true);
+  assert.equal(validateTrip(trip).ok, true, 'horaires de nuit possibles : non bloquant');
 });
 
 test('REC-F06 EXG-11 fenêtre de notification : pas avant 07:30, pas après le départ du soir, une fois par jour', () => {
@@ -75,13 +74,13 @@ test('REC-F07 EXG-14 journal limité aux 200 derniers événements, du plus réc
 });
 
 // ---------- Sécurité (cœur) ----------
-test('REC-S01 Paramètre admin laissé vide : refusé ? (constat ANO-01)', () => {
+test('REC-S01 Paramètre admin laissé vide : valeur par défaut de la SDB (ANO-01)', () => {
   const input = { ...S, rainRequiredMm: '', rainAdvisedPct: '', glovesWinterBelowC: '' };
   const v = validateSettings(input);
-  if (v.ok) {
+  if (v.ok && v.value.rainRequiredMm === 0) {
     note('ANO-01', `Champ vide accepté et enregistré à 0 : cumul « indispensable » = ${v.value.rainRequiredMm} mm, seuil « conseillée » = ${v.value.rainAdvisedPct} %, seuil gants = ${v.value.glovesWinterBelowC} °C.`);
   }
-  assert.ok(true);
+  assert.deepEqual([v.value.rainRequiredMm, v.value.rainAdvisedPct, v.value.glovesWinterBelowC], [0.5, 30, 10], 'ANO-01 corrigée : valeurs par défaut de la SDB');
 });
 
 test('REC-S02 Identifiant avec balises HTML refusé', async () => {
@@ -115,7 +114,7 @@ test('REC-S04 Dernier administrateur protégé ; un admin ne peut pas se supprim
   await assert.rejects(auth.deleteAccount(admin.id, admin.id), /propre compte/);
 });
 
-test('REC-S05 Énumération des identifiants par le temps de réponse (constat ANO-07)', async () => {
+test('REC-S05 Énumération des identifiants par le temps de réponse (ANO-07)', async () => {
   const store = memoryStore();
   const auth = createAuth({ store, volatile: memoryStore(), iterations: 310000, now: () => Date.now() });
   await auth.setupAdmin('roland', 'Secret#2026');
@@ -128,14 +127,14 @@ test('REC-S05 Énumération des identifiants par le temps de réponse (constat A
   const known = await time('roland');
   const unknown = await time('inconnu');
   if (known > unknown * 5) note('ANO-07', `Identifiant existant : refus en ${known.toFixed(0)} ms ; inexistant : ${unknown.toFixed(1)} ms. Le temps de réponse révèle si un identifiant existe.`);
-  assert.ok(true);
+  assert.ok(unknown > known * 0.5, `ANO-07 corrigée : ${unknown.toFixed(0)} ms contre ${known.toFixed(0)} ms`);
 });
 
-test('REC-S06 ENF-09 précision des coordonnées envoyées à Open-Meteo (constat ANO-08)', () => {
+test('REC-S06 ENF-09 précision des coordonnées envoyées à Open-Meteo (ANO-08)', () => {
   const url = new URL(buildForecastUrl([{ lat: 47.215312, lon: -1.558543 }]));
   const lat = url.searchParams.get('latitude');
   if (lat.split('.')[1].length >= 4) note('ANO-08', `Coordonnées envoyées avec ${lat.split('.')[1].length} décimales (≈ 11 m) : l'adresse du domicile est identifiable. 2 décimales (≈ 1 km) suffisent pour la météo.`);
-  assert.ok(true);
+  assert.equal(lat, '47.22', 'ANO-08 corrigée : 2 décimales');
 });
 
 // ---------- Navigateur (S21 Ultra simulé) ----------
@@ -150,7 +149,7 @@ async function withEnv(fn, clock = FRIDAY_0700) {
   }
 }
 
-test('REC-S07 Écran Paramètres : vider le champ « Cumul indispensable » puis enregistrer (constat ANO-01)', () =>
+test('REC-S07 Écran Paramètres : vider le champ « Cumul indispensable » puis enregistrer (ANO-01)', () =>
   withEnv(async ({ page, base }) => {
     await setupAdmin(page, base);
     await page.goto(base + '#/admin/parametres');
@@ -159,8 +158,10 @@ test('REC-S07 Écran Paramètres : vider le champ « Cumul indispensable » puis
     await page.waitForSelector('#params-msg .alert');
     const ok = (await page.getAttribute('#params-msg .alert', 'class')).includes('success');
     const db = await dumpDb(page);
-    if (ok) note('ANO-01', `Écran : champ vidé → « Paramètres enregistrés », valeur stockée ${db.settings?.rainRequiredMm} mm (au lieu d'un refus).`);
-    assert.ok(true);
+    if (ok && db.settings?.rainRequiredMm === 0) note('ANO-01', `Écran : champ vidé → « Paramètres enregistrés », valeur stockée ${db.settings?.rainRequiredMm} mm (au lieu d'un refus).`);
+    assert.equal(db.settings.rainRequiredMm, 0.5, 'valeur par défaut enregistrée');
+    assert.equal(await page.inputValue('#p-rainRequiredMm'), '0.5', 'valeur par défaut réaffichée');
+    assert.match(await page.textContent('#params-msg'), /valeur par défaut/);
   }));
 
 test('REC-S08 Profil utilisateur : URL admin refusée, menu Admin absent, droits relus à chaque écran', () =>
@@ -215,7 +216,7 @@ test('REC-S09 Élévation de privilège en modifiant le stockage local (constat 
     assert.ok(true);
   }));
 
-test('REC-F08 Accueil hors-ligne avec une prévision de la veille : la date apparaît-elle ? (constat ANO-04)', async () => {
+test('REC-F08 Accueil hors-ligne avec une prévision de la veille : la date apparaît (ANO-04)', async () => {
   const env = await startEnv();
   try {
     const { page, base } = env;
@@ -231,6 +232,7 @@ test('REC-F08 Accueil hors-ligne avec une prévision de la veille : la date appa
     const stale = await page.isVisible('#stale');
     assert.ok(stale, 'bandeau « périmée » affiché');
     if (!/\d{2}\/\d{2}/.test(updated)) note('ANO-04', `Prévision de la veille affichée « ${updated} » sans la date : on peut croire qu'elle date de ce jour à 18:00.`);
+    assert.equal(updated, 'Mis à jour le 26/11 à 18:00', 'ANO-04 corrigée');
   } finally {
     await env.close();
   }
@@ -259,6 +261,56 @@ test('REC-T01 CSP active : aucun script en ligne, aucune violation, aucune requ�
     assert.deepEqual(violations, []);
     assert.ok(env.externalRequests.every((u) => u.startsWith('https://')), env.externalRequests.join('\n'));
   }));
+
+test('REC-F10 Écran trajet : horaires inversés → avertissement puis « Enregistrer quand même » (ANO-06)', () =>
+  withEnv(async ({ page, base }) => {
+    await setupAdmin(page, base);
+    await page.fill('#addr-a', 'place royale');
+    await page.click('#sugg-a button:has-text("Place Royale")');
+    await page.fill('#addr-b', 'geraudiere');
+    await page.click('#sugg-b button:has-text("Géraudière")');
+    await setTime(page, 'morning', '18:00');
+    await setTime(page, 'evening', '08:00');
+    await page.click('#save-trip');
+    await page.waitForSelector('#trip-msg .alert.warn');
+    assert.match(await page.textContent('#trip-msg'), /n’est pas après celui du matin/);
+    assert.equal(await page.textContent('#save-trip'), 'Enregistrer quand même');
+    await page.click('#save-trip');
+    await page.waitForSelector('text=Trajet enregistré.');
+  }));
+
+test('REC-T06 Nouvelle version publiée : elle arrive sur le téléphone (ANO-03)', async () => {
+  const { mkdtempSync, cpSync, readFileSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { serve } = await import('../../scripts/serve.mjs');
+  const { chromium } = (await import('node:module')).createRequire(import.meta.url)('playwright');
+  const dir = join(mkdtempSync(join(tmpdir(), 'maj-')), 'app');
+  cpSync(join(import.meta.dirname, '..', '..', 'app'), dir, { recursive: true });
+  const server = await serve(dir, 0);
+  const base = `http://127.0.0.1:${server.address().port}/`;
+  const ctx = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), 'maj-prof-')), {});
+  try {
+    const page = ctx.pages()[0];
+    await page.goto(base);
+    await page.waitForFunction(() => navigator.serviceWorker.controller);
+    // Publication d'une nouvelle version, comme le fait le workflow (VERSION suffixée du commit)
+    const f = join(dir, 'js/ui/screens/auth.js');
+    writeFileSync(f, readFileSync(f, 'utf8').replace("'Bienvenue'", "'Bienvenue v2'"));
+    const sw = join(dir, 'sw.js');
+    writeFileSync(sw, readFileSync(sw, 'utf8').replace(/^const VERSION = '([^']+)';/m, "const VERSION = '$1-abc1234';"));
+    // Une seule réouverture : la nouvelle version s'installe puis la page se recharge d'elle-même
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector('h2')?.textContent === 'Bienvenue v2', null, { timeout: 15000 });
+    // Et toujours hors-ligne ensuite
+    await ctx.setOffline(true);
+    await page.reload();
+    assert.equal(await page.textContent('h2'), 'Bienvenue v2');
+  } finally {
+    await ctx.close();
+    server.close();
+  }
+});
 
 test.after(() => {
   // Résumé des constats pour le cahier de recette

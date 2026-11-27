@@ -145,8 +145,27 @@ npm install --no-save playwright && npx playwright install chromium
 npm run test:e2e    # 20 tests fonctionnels
 ```
 
+## 12. Corrections v1.0.1 (anomalies de la recette v1.0)
+
+Décision de Roland du 27/11/2026 : corriger toutes les anomalies (majeures et mineures). ANO-02 est accepté en v1 (point majeur des versions suivantes) et ANO-09 (vue « demain ») est prévu en v1.1.
+
+| Anomalie | Correction | Preuve |
+| --- | --- | --- |
+| ANO-01 | Un champ numérique vidé dans Paramètres admin reprend la valeur par défaut de la SDB, réaffichée avec un message ; la valeur par défaut est indiquée sous chaque champ | `tests/unit/corrections-recette.test.mjs`, REC-S01, REC-S07 |
+| ANO-03 | Le workflow suffixe `VERSION` de `sw.js` avec le commit à chaque publication ; le cache est rempli sans le cache HTTP (`cache: 'reload'`) ; la page se recharge une fois quand la nouvelle version prend la main | REC-T06 (nouvelle version affichée dès la réouverture, puis hors-ligne) |
+| ANO-04 | « Mis à jour le JJ/MM à HH:MM » quand la prévision n'est pas du jour | REC-F08 |
+| ANO-05 | Au moins un jour de travail exigé | unitaire, REC-F04 |
+| ANO-06 | Horaires inversés : avertissement et bouton « Enregistrer quand même » | unitaire, REC-F10 |
+| ANO-07 | Hachage fictif quand l'identifiant est inconnu (même temps de réponse) | unitaire, REC-S05 |
+| ANO-08 | Coordonnées envoyées à Open-Meteo arrondies à 2 décimales (≈ 1 km) | unitaire, REC-S06 |
+| ANO-10 | Notification : « Prévision du JJ/MM à HH:MM, non mise à jour. » quand elle a plus de 3 h | unitaire |
+| P4 | Procédure « mot de passe administrateur oublié » et limites connues dans le README | README |
+
+Résultats : 62 tests unitaires (couverture 100 % maintenue), 20 tests fonctionnels, 21 tests de recette, tous OK. Les tests de recette sont ajoutés au workflow (`npm run test:recette`).
+
 ## Historique
 
 | Version | Date | Auteur | Changement |
 | --- | --- | --- | --- |
 | v1.0 | 26/11/2026 | Dev_A | Première version, d'après la SDB v0.1 |
+| v1.0.1 | 27/11/2026 | Dev_A | Corrections des anomalies de la recette v1.0 (section 12) |

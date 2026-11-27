@@ -1,6 +1,6 @@
-# Application_01 · Cahier de recette v1.0
+# Application_01 · Cahier de recette v1.1
 
-Version 1.0 du 26/11/2026 · Recetteur : Rec_A · Pilote : manager_A · Demandeur : Roland
+Version 1.1 du 27/11/2026 · Recetteur : Rec_A · Pilote : manager_A · Demandeur : Roland
 
 ## 1. Objet et périmètre
 
@@ -37,7 +37,9 @@ Rejouer la recette : `npm run test:unit`, `npm run test:e2e`, puis `TZ=Europe/Pa
 | Points à arbitrer avec Roland (via manager_A) | 4 |
 | Tests à faire sur le S21 Ultra | 13 |
 
-**Avis du recetteur : recette NON prononcée, avec réserves.** Le cœur métier est juste : les règles RG-01 à RG-08 donnent le bon verdict aux bornes, les profils sont séparés à l'écran, les mots de passe sont correctement hachés et aucun texte externe n'est injecté dans la page. Deux anomalies majeures doivent être corrigées avant la mise en service : un paramètre admin vidé est enregistré à 0 sans prévenir (ANO-01, fausse alerte pluie tous les jours), et une nouvelle version de l'application n'arrive pas sur le téléphone tant que le numéro de cache n'est pas changé à la main (ANO-03, les corrections futures risquent de ne jamais être livrées). Les tests sur le téléphone restent à faire.
+**Mise à jour v1.1 (27/11/2026) : après corrections, toutes les anomalies retenues sont corrigées et vérifiées (section 9). Avis : recette technique, sécurité et fonctionnelle prononcée sur l'environnement de dev ; la validation finale attend les tests sur le S21 Ultra (section 7).**
+
+Avis initial v1.0 : recette NON prononcée, avec réserves. Le cœur métier est juste : les règles RG-01 à RG-08 donnent le bon verdict aux bornes, les profils sont séparés à l'écran, les mots de passe sont correctement hachés et aucun texte externe n'est injecté dans la page. Deux anomalies majeures doivent être corrigées avant la mise en service : un paramètre admin vidé est enregistré à 0 sans prévenir (ANO-01, fausse alerte pluie tous les jours), et une nouvelle version de l'application n'arrive pas sur le téléphone tant que le numéro de cache n'est pas changé à la main (ANO-03, les corrections futures risquent de ne jamais être livrées). Les tests sur le téléphone restent à faire.
 
 ## 4. Cas de tests
 
@@ -151,12 +153,33 @@ Préalable : régler GitHub → Settings → Pages → Source : GitHub Actions, 
 
 | Fichier | Contenu |
 | --- | --- |
-| `tests/recette/recette.test.mjs` | 19 cas automatisés de Rec_A (REC-F01 à F09, REC-S01 à S09, REC-T01), affichent les constats ANO |
+| `tests/recette/recette.test.mjs` | 21 cas automatisés de Rec_A (non-régression des anomalies), lancés par `npm run test:recette` et par le workflow |
 | `docs/cahier-de-recette.md` | Ce document |
 
-## 9. Historique
+## 9. Re-recette des corrections v1.0.1 (27/11/2026)
+
+Les tests de recette ont été transformés en tests de non-régression : ils échouent si une anomalie revient. Résultats : 62 tests unitaires (couverture 100 % des règles de calcul), 20 tests fonctionnels, 21 tests de recette, tous OK.
+
+| Anomalie | Vérification | Statut |
+| --- | --- | --- |
+| ANO-01 | Champ vidé : « Paramètres enregistrés. Champ vide remis à sa valeur par défaut : Cumul « indispensable » (mm) : 0,5 », valeur 0,5 réaffichée et stockée ; la valeur par défaut est indiquée sous chaque champ | Corrigée |
+| ANO-02 | Risque accepté par Roland pour la v1 ; écrit dans le README (limites connues) ; point majeur des versions suivantes | Acceptée |
+| ANO-03 | Nouvelle version publiée (VERSION suffixée comme le fait le workflow) : affichée dès la réouverture, puis disponible hors-ligne | Corrigée |
+| ANO-04 | Prévision de la veille : « Mis à jour le 26/11 à 18:00 » | Corrigée |
+| ANO-05 | Trajet sans jour coché : « Cochez au moins un jour de travail » | Corrigée |
+| ANO-06 | Matin 18:00, soir 08:00 : avertissement, puis « Enregistrer quand même » enregistre | Corrigée |
+| ANO-07 | Temps de refus équivalent pour un identifiant existant ou inconnu | Corrigée |
+| ANO-08 | Open-Meteo reçoit `latitude=47.22` au lieu de `47.2153` | Corrigée |
+| ANO-09 | Vue « demain » prévue en v1.1 (décision de Roland) | Reportée |
+| ANO-10 | Notification hors-ligne : « Prévision du 26/11 à 18:05, non mise à jour. » | Corrigée |
+| P4 | Procédure « mot de passe administrateur oublié » dans le README | Fait |
+
+Reste à faire : publication GitHub Pages (réglage Source par Roland), puis les tests D01 à D13 sur le S21 Ultra.
+
+## 10. Historique
 
 | Version | Date | Auteur | Changement |
 | --- | --- | --- | --- |
 | v1.0 | 26/11/2026 | Rec_A | Première recette sur `main` (commit 2a154c6) |
 | v1.0.1 | 27/11/2026 | Rec_A | ANO-01 : correction décidée par Roland (valeur par défaut de la SDB) ; ANO-02 / P1 : risque accepté en v1, point majeur des versions suivantes ; P2 arrondi validé, P3 vue « demain » en v1.1, P4 accepté avec procédure README |
+| v1.1 | 27/11/2026 | Rec_A | Re-recette des corrections v1.0.1 (section 9) |

@@ -1,6 +1,6 @@
 // Accueil : verdict du jour (EXG-08 à EXG-10, EXG-12, RG-07).
-import { getDayReport, loadSettings } from '../../core/service.js';
-import { MODES, pointLevel } from '../../core/rules.js';
+import { getDayReport, loadSettings, stamp } from '../../core/service.js';
+import { MODES, pointLevel, sameDay } from '../../core/rules.js';
 import { KEYS } from '../../core/store.js';
 import { alertBox, fmtNum, fmtTime, h, mount } from '../dom.js';
 
@@ -9,6 +9,11 @@ const ADVICE = [
   'Vêtements de pluie conseillés.',
   'Prenez vos vêtements de pluie.',
 ];
+
+/** EXG-12 / ANO-04 : la date est ajoutée quand la prévision n'est pas du jour. */
+function updatedLabel(fetchedAt) {
+  return sameDay(new Date(fetchedAt), new Date()) ? `Mis à jour à ${fmtTime(fetchedAt)}` : `Mis à jour le ${stamp(fetchedAt)}`;
+}
 
 function verdictCard(report) {
   const { verdict, gloves } = report.result;
@@ -23,7 +28,7 @@ function verdictCard(report) {
       'div',
       { class: 'chips' },
       h('span', { class: 'chip', id: 'gloves' }, `🧤 ${gloves.label} (min ${fmtNum(gloves.minTemp)} °C)`),
-      h('span', { class: 'chip', id: 'updated' }, `Mis à jour à ${fmtTime(report.fetchedAt)}`),
+      h('span', { class: 'chip', id: 'updated' }, updatedLabel(report.fetchedAt)),
     ),
   );
 }

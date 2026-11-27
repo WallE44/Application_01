@@ -31,12 +31,19 @@ export const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 /**
  * Valide un objet de paramètres complet. Retourne { ok, errors, value }.
  * Les nombres peuvent arriver en chaîne (formulaire) : ils sont convertis.
+ * Un champ numérique vide reprend sa valeur par défaut ; `defaulted` liste ces champs.
  */
 export function validateSettings(input) {
   const errors = [];
   const value = { ...DEFAULT_SETTINGS };
+  const defaulted = [];
   for (const [key, [min, max, label]] of Object.entries(NUMERIC_BOUNDS)) {
     const raw = input?.[key];
+    // Champ vidé : jamais enregistré vide ni à 0, il reprend la valeur par défaut de la SDB (décision du 27/11/2026).
+    if (input != null && typeof raw === 'string' && raw.trim() === '') {
+      defaulted.push(key);
+      continue;
+    }
     const n = typeof raw === 'string' ? Number(raw.replace(',', '.')) : raw;
     if (!Number.isFinite(n) || n < min || n > max) {
       errors.push(`${label} : valeur attendue entre ${min} et ${max}`);
@@ -57,7 +64,7 @@ export function validateSettings(input) {
   if (errors.length === 0 && !(value.rainAdvisedPct < value.rainRequiredPct)) {
     errors.push('Le seuil « conseillée » doit être inférieur au seuil « indispensable »');
   }
-  return { ok: errors.length === 0, errors, value: errors.length === 0 ? value : null };
+  return { ok: errors.length === 0, errors, value: errors.length === 0 ? value : null, defaulted };
 }
 
 /** Fusionne des paramètres stockés avec les défauts (tolère les anciennes versions). */
